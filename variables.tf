@@ -15,6 +15,9 @@ variable network_address_space {
 variable "instance_size" {
   type = map(string)
 }
+variable "db_size" {
+  type = map(string)
+}
 variable "subnet_count" {
   type = map(number)
 }
