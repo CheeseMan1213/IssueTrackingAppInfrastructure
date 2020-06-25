@@ -72,8 +72,8 @@ module "db" {
   storage_encrypted = false
 
   name              = "issuetrackingapp${local.env_name}db"
-  username          = "postgres"
-  password          = "password"
+  username          = var.databaseUserName
+  password          = var.databasePassword
   port              = "5432"
   availability_zone = "us-east-1a"
 
