@@ -71,10 +71,11 @@ module "db" {
   allocated_storage = 5
   storage_encrypted = false
 
-  name     = "issuetrackingapp${local.env_name}db"
-  username = "postgres"
-  password = "password"
-  port     = "5432"
+  name              = "issuetrackingapp${local.env_name}db"
+  username          = "postgres"
+  password          = "password"
+  port              = "5432"
+  availability_zone = "us-east-1a"
 
   # iam_database_authentication_enabled = true
 
