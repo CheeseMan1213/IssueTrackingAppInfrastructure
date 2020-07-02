@@ -1,3 +1,8 @@
+# Controls for the terraform version allowed to be used from the cli.
+terraform {
+  required_version = ">= 0.12.0"
+}
+
 ##################################################################################
 # PROVIDERS
 ##################################################################################
@@ -17,6 +22,14 @@ provider "template" {
   version = "~> 2.1"
 }
 
+provider "kubernetes" {
+  version                = "~> 1.9"
+  host                   = data.aws_eks_cluster.cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.cluster.token
+  load_config_file       = false
+}
+
 ##################################################################################
 # DATA
 ##################################################################################
@@ -32,6 +45,14 @@ data "template_file" "public_cidrsubnet" {
     vpc_cidr      = var.network_address_space[terraform.workspace]
     current_count = count.index
   }
+}
+
+data "aws_eks_cluster" "cluster" {
+  name = module.my-cluster.cluster_id
+}
+
+data "aws_eks_cluster_auth" "cluster" {
+  name = module.my-cluster.cluster_id
 }
 
 ##################################################################################
@@ -119,4 +140,22 @@ resource "aws_security_group" "postgres-sg" {
   }
 
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-postgres-sg" })
+}
+
+module "my-cluster" {
+  source          = "terraform-aws-modules/eks/aws"
+  cluster_name    = "IssueTracking${local.env_name}Cluster"
+  cluster_version = "1.16"
+  # It wants subnet IDs.
+  subnets = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
+  vpc_id  = module.vpc.vpc_id
+
+  worker_groups = [
+    {
+      instance_type = var.instance_size[terraform.workspace]
+      asg_max_size  = 1
+    }
+  ]
+
+  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-cluster" })
 }
