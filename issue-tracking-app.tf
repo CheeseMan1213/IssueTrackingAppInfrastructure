@@ -144,6 +144,7 @@ resource "aws_security_group" "postgres-sg" {
 
 module "my-cluster" {
   source          = "terraform-aws-modules/eks/aws"
+  version         = "12.1.0"
   cluster_name    = "IssueTracking${local.env_name}Cluster"
   cluster_version = "1.16"
   # It wants subnet IDs.
@@ -153,7 +154,7 @@ module "my-cluster" {
   worker_groups = [
     {
       instance_type = var.instance_size[terraform.workspace]
-      asg_max_size  = 1
+      asg_max_size  = 2
     }
   ]
 
