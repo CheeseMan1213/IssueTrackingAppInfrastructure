@@ -18,7 +18,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "issue-tracking-code-build-policy" {
-  role = "${aws_iam_role.issue-tracking-code-build-role.name}"
+  role = aws_iam_role.issue-tracking-code-build-role.name
 
   policy = <<POLICY
 {
@@ -74,7 +74,7 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
   name          = "issue-tracking-codebuild"
   description   = "issue-tracking-codebuild"
   build_timeout = "5"
-  service_role  = "${aws_iam_role.issue-tracking-code-build-role.arn}"
+  service_role  = aws_iam_role.issue-tracking-code-build-role.arn
 
   artifacts {
     type = "NO_ARTIFACTS"
