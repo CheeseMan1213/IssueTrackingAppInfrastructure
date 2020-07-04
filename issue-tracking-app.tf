@@ -117,6 +117,15 @@ module "db" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-postgres-db" })
 }
 
+resource "aws_ecr_repository" "issue-tracking-ecr-repo" {
+  name                 = "issue-tracking-ecr-repo"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
 # Postgres DB security group 
 resource "aws_security_group" "postgres-sg" {
   name   = "postgres-sg"
@@ -153,8 +162,11 @@ module "my-cluster" {
 
   worker_groups = [
     {
-      instance_type = var.instance_size[terraform.workspace]
-      asg_max_size  = 2
+      # instance_type = var.instance_size[terraform.workspace]
+      # instance_type = "t2.medium"
+      # asg_max_size  = 2
+      instance_type = "m4.large"
+      asg_max_size  = 5
     }
   ]
 
