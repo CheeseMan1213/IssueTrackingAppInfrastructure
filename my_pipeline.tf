@@ -58,7 +58,10 @@ resource "aws_iam_role_policy" "issue-tracking-code-build-policy" {
       ],
       "Condition": {
         "StringEquals": {
-          "ec2:Subnet": [ ${flatten([module.vpc.public_subnets, module.vpc.private_subnets])} ],
+          "ec2:Subnet": [
+            "${module.vpc.public_subnet_arns[0]}",
+            "${module.vpc.public_subnet_arns[1]}"
+            ],
           "ec2:AuthorizedService": "codebuild.amazonaws.com"
         }
       }
@@ -66,6 +69,14 @@ resource "aws_iam_role_policy" "issue-tracking-code-build-policy" {
   ]
 }
 POLICY
+  # The resource itself.
+}
+
+# Second policy. This is an AWS managed one.
+resource "aws_iam_role_policy_attachment" "issue-tracking-ecr-full-access" {
+  role       = aws_iam_role.issue-tracking-code-build-role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+
 }
 
 ## The main thing we want at the monent is an AWS CodeBuild project.
@@ -80,27 +91,31 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
     type = "NO_ARTIFACTS"
   }
 
-#   cache {
-#     type     = "S3"
-#     location = "${aws_s3_bucket.example.bucket}"
-#   }
+  #   cache {
+  #     type     = "S3"
+  #     location = "${aws_s3_bucket.example.bucket}"
+  #   }
 
+  # Required
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:1.0"
+    image                       = "aws/codebuild/standard:4.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
+    privileged_mode             = true
 
-    environment_variable {
-      name  = "SOME_KEY1"
-      value = "SOME_VALUE1"
-    }
+    # Optional
+    # environment_variable {
+    #   name  = "SOME_KEY1"
+    #   value = "SOME_VALUE1"
+    # }
 
-    environment_variable {
-      name  = "SOME_KEY2"
-      value = "SOME_VALUE2"
-      type  = "PARAMETER_STORE"
-    }
+    # Optional
+    # environment_variable {
+    #   name  = "SOME_KEY2"
+    #   value = "SOME_VALUE2"
+    #   type  = "PARAMETER_STORE"
+    # }
   }
 
   logs_config {
@@ -116,7 +131,7 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
   }
 
   source {
-    type            = "GITHUB"
+    type = "GITHUB"
     # location        = "https://github.com/mitchellh/packer.git"
     location        = "https://github.com/CheeseMan1213/IssueTrackingAppFrontend.git"
     git_clone_depth = 1
@@ -128,24 +143,24 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
 
   source_version = "master"
 
-#   vpc_config {
-#     vpc_id = module.vpc.vpc_id
+  #   vpc_config {
+  #     vpc_id = module.vpc.vpc_id
 
-#     # subnets = [
-#     #   "${aws_subnet.example1.id}",
-#     #   "${aws_subnet.example2.id}",
-#     # ]
-#     # It wants subnet IDs.
-#     subnets = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
+  #     # subnets = [
+  #     #   "${aws_subnet.example1.id}",
+  #     #   "${aws_subnet.example2.id}",
+  #     # ]
+  #     # It wants subnet IDs.
+  #     subnets = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
 
-#     security_group_ids = [
-#       "${aws_security_group.example1.id}",
-#       "${aws_security_group.example2.id}",
-#     ]
-#   }
+  #     security_group_ids = [
+  #       "${aws_security_group.example1.id}",
+  #       "${aws_security_group.example2.id}",
+  #     ]
+  #   }
 
-#   tags = {
-#     Environment = "Test"
-#   }
+  #   tags = {
+  #     Environment = "Test"
+  #   }
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild" })
 }
