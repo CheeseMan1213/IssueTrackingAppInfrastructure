@@ -75,6 +75,7 @@ module "vpc" {
   azs             = slice(data.aws_availability_zones.available.names, 0, var.subnet_count[terraform.workspace])
   public_subnets  = data.template_file.public_cidrsubnet[*].rendered # Expects CIDRs
   private_subnets = []
+  create_igw      = true
 
   tags = local.common_tags
 }
@@ -163,10 +164,10 @@ module "my-cluster" {
   worker_groups = [
     {
       # instance_type = var.instance_size[terraform.workspace]
-      # instance_type = "t2.medium"
+      instance_type = "t2.medium"
       # asg_max_size  = 2
-      instance_type = "m4.large"
-      asg_max_size  = 5
+      # instance_type = "m4.large"
+      asg_max_size = 5
     }
   ]
 
