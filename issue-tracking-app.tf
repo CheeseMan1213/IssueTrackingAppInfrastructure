@@ -22,13 +22,13 @@ provider "template" {
   version = "~> 2.1"
 }
 
-provider "kubernetes" {
-  version                = "~> 1.9"
-  host                   = data.aws_eks_cluster.cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.cluster.token
-  load_config_file       = false
-}
+# provider "kubernetes" {
+#   version                = "~> 1.9"
+#   host                   = data.aws_eks_cluster.cluster.endpoint
+#   cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+#   token                  = data.aws_eks_cluster_auth.cluster.token
+#   load_config_file       = false
+# }
 
 ##################################################################################
 # DATA
@@ -47,13 +47,13 @@ data "template_file" "public_cidrsubnet" {
   }
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = module.my-cluster.cluster_id
-}
+# data "aws_eks_cluster" "cluster" {
+#   name = module.my-cluster.cluster_id
+# }
 
-data "aws_eks_cluster_auth" "cluster" {
-  name = module.my-cluster.cluster_id
-}
+# data "aws_eks_cluster_auth" "cluster" {
+#   name = module.my-cluster.cluster_id
+# }
 
 ##################################################################################
 # RESOURCES
@@ -152,25 +152,25 @@ resource "aws_security_group" "postgres-sg" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-postgres-sg" })
 }
 
-module "my-cluster" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "12.1.0"
-  cluster_name    = "IssueTracking${local.env_name}Cluster"
-  cluster_version = "1.16"
-  # It wants subnet IDs.
-  subnets                        = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
-  vpc_id                         = module.vpc.vpc_id
-  cluster_endpoint_public_access = true
+# module "my-cluster" {
+#   source          = "terraform-aws-modules/eks/aws"
+#   version         = "12.1.0"
+#   cluster_name    = "IssueTracking${local.env_name}Cluster"
+#   cluster_version = "1.16"
+#   # It wants subnet IDs.
+#   subnets                        = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
+#   vpc_id                         = module.vpc.vpc_id
+#   cluster_endpoint_public_access = true
 
-  worker_groups = [
-    {
-      # instance_type = var.instance_size[terraform.workspace]
-      instance_type = "t2.medium"
-      # asg_max_size  = 2
-      # instance_type = "m4.large"
-      asg_max_size = 5
-    }
-  ]
+#   worker_groups = [
+#     {
+#       # instance_type = var.instance_size[terraform.workspace]
+#       instance_type = "t2.medium"
+#       # asg_max_size  = 2
+#       # instance_type = "m4.large"
+#       asg_max_size = 5
+#     }
+#   ]
 
-  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-cluster" })
-}
+#   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-cluster" })
+# }
