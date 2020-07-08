@@ -158,8 +158,9 @@ module "my-cluster" {
   cluster_name    = "IssueTracking${local.env_name}Cluster"
   cluster_version = "1.16"
   # It wants subnet IDs.
-  subnets = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
-  vpc_id  = module.vpc.vpc_id
+  subnets                        = flatten([module.vpc.public_subnets, module.vpc.private_subnets])
+  vpc_id                         = module.vpc.vpc_id
+  cluster_endpoint_public_access = true
 
   worker_groups = [
     {
