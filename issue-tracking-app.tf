@@ -118,8 +118,17 @@ module "db" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-postgres-db" })
 }
 
-resource "aws_ecr_repository" "issue-tracking-ecr-repo" {
-  name                 = "issue-tracking-ecr-repo"
+resource "aws_ecr_repository" "issue-tracking-ecr-frontend" {
+  name                 = "issue-tracking-ecr-frontend"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "issue-tracking-ecr-backend" {
+  name                 = "issue-tracking-ecr-backend"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
