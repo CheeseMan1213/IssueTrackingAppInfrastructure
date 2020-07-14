@@ -1,5 +1,5 @@
-resource "aws_ecs_task_definition" "frontend_task_2" {
-  family                   = "frontend_task_2"
+resource "aws_ecs_task_definition" "frontend_task_3" {
+  family                   = "frontend_task_3"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   // task_role_arn = "value"
@@ -10,10 +10,11 @@ resource "aws_ecs_task_definition" "frontend_task_2" {
   container_definitions = <<EOF
 [
   {
-    "name": "frontend_task_2",
-    "image": "475640621870.dkr.ecr.us-east-1.amazonaws.com/issue-tracking-ecr-repo:build-48c8ad7f-294c-41b6-9725-003985590aae",
+    "name": "frontend_task_3",
+    "image": "475640621870.dkr.ecr.us-east-1.amazonaws.com/issue-tracking-ecr-repo:latest",
     "cpu": 1024,
-    "memory": 2048
+    "memory": 2048,
+    "essential": true
   }
 ]
 EOF
@@ -22,7 +23,7 @@ EOF
 resource "aws_ecs_service" "frontend_service" {
   name            = "frontend_service"
   cluster         = module.ecs.this_ecs_cluster_id
-  task_definition = aws_ecs_task_definition.frontend_task_2.arn
+  task_definition = aws_ecs_task_definition.frontend_task_3.arn
   launch_type     = "FARGATE"
   // I got an error saying that services only need the IAM role if there is a load balancer.
   // iam_role        = "arn:aws:iam::475640621870:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
