@@ -81,20 +81,15 @@ resource "aws_iam_role_policy_attachment" "issue-tracking-ecr-full-access" {
 
 ## The main thing we want at the monent is an AWS CodeBuild project.
 # The rest of the resources in this file are for this one.
-resource "aws_codebuild_project" "issue-tracking-codebuild" {
-  name          = "issue-tracking-codebuild"
-  description   = "issue-tracking-codebuild"
-  build_timeout = "5"
+resource "aws_codebuild_project" "issue-tracking-codebuild-frontend" {
+  name          = "issue-tracking-codebuild-frontend"
+  description   = "issue-tracking-codebuild-frontend"
+  build_timeout = "60"
   service_role  = aws_iam_role.issue-tracking-code-build-role.arn
 
   artifacts {
     type = "NO_ARTIFACTS"
   }
-
-  #   cache {
-  #     type     = "S3"
-  #     location = "${aws_s3_bucket.example.bucket}"
-  #   }
 
   # Required
   environment {
@@ -103,36 +98,16 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
     privileged_mode             = true
-
-    # Optional
-    # environment_variable {
-    #   name  = "SOME_KEY1"
-    #   value = "SOME_VALUE1"
-    # }
-
-    # Optional
-    # environment_variable {
-    #   name  = "SOME_KEY2"
-    #   value = "SOME_VALUE2"
-    #   type  = "PARAMETER_STORE"
-    # }
   }
 
-  logs_config {
-    cloudwatch_logs {
-      group_name  = "log-group"
-      stream_name = "log-stream"
-    }
-
-    # s3_logs {
-    #   status   = "ENABLED"
-    #   location = "${aws_s3_bucket.example.id}/build-log"
-    # }
-  }
+  # logs_config {
+  #   cloudwatch_logs {
+  #     group_name  = "log-group"
+  #     stream_name = "log-stream"
+  #   }
 
   source {
-    type = "GITHUB"
-    # location        = "https://github.com/mitchellh/packer.git"
+    type            = "GITHUB"
     location        = "https://github.com/CheeseMan1213/IssueTrackingAppFrontend.git"
     git_clone_depth = 1
 
@@ -158,9 +133,39 @@ resource "aws_codebuild_project" "issue-tracking-codebuild" {
   #       "${aws_security_group.example2.id}",
   #     ]
   #   }
+  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild-frontend" })
+}
 
-  #   tags = {
-  #     Environment = "Test"
-  #   }
-  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild" })
+resource "aws_codebuild_project" "issue-tracking-codebuild-backend" {
+  name          = "issue-tracking-codebuild-backend"
+  description   = "issue-tracking-codebuild-backend"
+  build_timeout = "60"
+  service_role  = aws_iam_role.issue-tracking-code-build-role.arn
+
+  artifacts {
+    type = "NO_ARTIFACTS"
+  }
+
+  # Required
+  environment {
+    compute_type                = "BUILD_GENERAL1_SMALL"
+    image                       = "aws/codebuild/standard:4.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+    privileged_mode             = true
+  }
+
+  source {
+    type            = "GITHUB"
+    location        = "https://github.com/CheeseMan1213/IssueTrackingAppBackend.git"
+    git_clone_depth = 1
+
+    git_submodules_config {
+      fetch_submodules = true
+    }
+  }
+
+  source_version = "master"
+
+  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild-backend" })
 }
