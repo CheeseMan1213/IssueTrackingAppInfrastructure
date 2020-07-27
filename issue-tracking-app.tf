@@ -1,6 +1,6 @@
 # Controls for the terraform version allowed to be used from the cli.
 terraform {
-  required_version = ">= 0.12.0"
+  required_version = ">= 0.12.29"
 }
 
 ##################################################################################
@@ -71,11 +71,12 @@ module "vpc" {
   name    = "issue_tracking_app-${local.env_name}-vpc"
   version = "2.44.0"
 
-  cidr            = var.network_address_space[terraform.workspace]
-  azs             = slice(data.aws_availability_zones.available.names, 0, var.subnet_count[terraform.workspace])
-  public_subnets  = data.template_file.public_cidrsubnet[*].rendered # Expects CIDRs
-  private_subnets = []
-  create_igw      = true
+  cidr               = var.network_address_space[terraform.workspace]
+  azs                = slice(data.aws_availability_zones.available.names, 0, var.subnet_count[terraform.workspace])
+  public_subnets     = data.template_file.public_cidrsubnet[*].rendered # Expects CIDRs
+  private_subnets    = []
+  create_igw         = true
+  enable_nat_gateway = true
 
   tags = local.common_tags
 }
