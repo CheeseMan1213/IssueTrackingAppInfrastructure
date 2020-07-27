@@ -80,7 +80,7 @@ resource "aws_iam_role_policy_attachment" "issue-tracking-ecr-full-access" {
 }
 
 ## The main thing we want at the monent is an AWS CodeBuild project.
-# The rest of the resources in this file are for this one.
+# The rest of the resources in this file are for those.
 resource "aws_codebuild_project" "issue-tracking-codebuild-frontend" {
   name          = "issue-tracking-codebuild-frontend"
   description   = "issue-tracking-codebuild-frontend"
