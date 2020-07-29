@@ -184,3 +184,33 @@ resource "aws_security_group" "postgres-sg" {
 
 #   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-cluster" })
 # }
+
+##### Test EC2 module #####
+
+# module "test_instance_1" {
+#   source  = "terraform-aws-modules/ec2-instance/aws"
+#   version = "~> 2.15.0"
+
+#   name           = "test_instance_1"
+#   instance_count = 1
+
+#   ami                    = "ami-08f3d892de259504d"
+#   instance_type          = "t2.micro"
+#   key_name               = "hamster_key"
+#   monitoring             = false
+#   vpc_security_group_ids = ["sg-fc2dc1d3"] # From the default VPC.
+#   subnet_id              = "subnet-ad3f87e0" # From the default VPC.
+#   root_block_device = [
+#     {
+#       volume_type = "gp2"
+#       volume_size = 10
+#     },
+#   ]
+
+#   tags = {
+#     Name        = "My first EC2 with terraform module"
+#     Environment = "test"
+#   }
+# }
+
+##### Test EC2 module #####
