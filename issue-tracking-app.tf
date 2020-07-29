@@ -162,6 +162,43 @@ resource "aws_security_group" "postgres-sg" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-postgres-sg" })
 }
 
+# EC2 instance security group 
+resource "aws_security_group" "ec2_sg" {
+  name   = "ec2_sg"
+  vpc_id = module.vpc.vpc_id
+
+  ingress { # 1
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress { # 2
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress { # 3
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all traffic out of the EC2 instance.
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}_ec2_sg" })
+}
+
 # module "my-cluster" {
 #   source          = "terraform-aws-modules/eks/aws"
 #   version         = "12.1.0"
@@ -185,32 +222,30 @@ resource "aws_security_group" "postgres-sg" {
 #   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-cluster" })
 # }
 
-##### Test EC2 module #####
+/*
+    This will be a "roll my own" "production like" enviornment EC2 instance.
+    I am doing this because I had trouble with EKS, and ECS, and the load balancer being forced
+    on me.
+*/
+module "production_like_EC2_1" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 2.15.0"
 
-# module "test_instance_1" {
-#   source  = "terraform-aws-modules/ec2-instance/aws"
-#   version = "~> 2.15.0"
+  name           = "production_like_EC2_1"
+  instance_count = 1
 
-#   name           = "test_instance_1"
-#   instance_count = 1
+  ami                    = "ami-098f16afa9edf40be"
+  instance_type          = "t2.medium" # 2 CPU and 4 RAM
+  key_name               = "IssueTrackingApp_EC2_key"
+  monitoring             = true
+  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  subnet_id              = module.vpc.public_subnets[0]
+  root_block_device = [
+    {
+      volume_type = "gp2"
+      volume_size = 30
+    },
+  ]
 
-#   ami                    = "ami-08f3d892de259504d"
-#   instance_type          = "t2.micro"
-#   key_name               = "hamster_key"
-#   monitoring             = false
-#   vpc_security_group_ids = ["sg-fc2dc1d3"] # From the default VPC.
-#   subnet_id              = "subnet-ad3f87e0" # From the default VPC.
-#   root_block_device = [
-#     {
-#       volume_type = "gp2"
-#       volume_size = 10
-#     },
-#   ]
-
-#   tags = {
-#     Name        = "My first EC2 with terraform module"
-#     Environment = "test"
-#   }
-# }
-
-##### Test EC2 module #####
+  tags = merge(local.common_tags, { Name = "issueTracking-${local.env_name}_production_like_EC2_1" })
+}
