@@ -234,12 +234,13 @@ module "production_like_EC2_1" {
   name           = "production_like_EC2_1"
   instance_count = 1
 
-  ami                    = "ami-098f16afa9edf40be"
-  instance_type          = "t2.medium" # 2 CPU and 4 RAM
-  key_name               = "IssueTrackingApp_EC2_key"
-  monitoring             = true
-  vpc_security_group_ids = [aws_security_group.ec2_sg.id]
-  subnet_id              = module.vpc.public_subnets[0]
+  ami                         = "ami-08f3d892de259504d"
+  instance_type               = "t2.medium" # 2 CPU and 4 RAM
+  key_name                    = "IssueTrackingApp_EC2_key"
+  monitoring                  = true
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+  subnet_id                   = module.vpc.public_subnets[0]
   root_block_device = [
     {
       volume_type = "gp2"
@@ -248,4 +249,10 @@ module "production_like_EC2_1" {
   ]
 
   tags = merge(local.common_tags, { Name = "issueTracking-${local.env_name}_production_like_EC2_1" })
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  # 'instance_id' needs to be accessed as an array, because I am using the module, not the resource.
+  instance_id   = module.production_like_EC2_1.id[0]
+  allocation_id = "eipalloc-088b4ae5c94d86337"
 }
