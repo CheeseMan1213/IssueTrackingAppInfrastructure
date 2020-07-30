@@ -234,7 +234,7 @@ module "production_like_EC2_1" {
   name           = "production_like_EC2_1"
   instance_count = 1
 
-  ami                         = "ami-08f3d892de259504d"
+  ami                         = "ami-0332883b0fc77c4c7"
   instance_type               = "t2.medium" # 2 CPU and 4 RAM
   key_name                    = "IssueTrackingApp_EC2_key"
   monitoring                  = true
