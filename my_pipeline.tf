@@ -169,3 +169,35 @@ resource "aws_codebuild_project" "issue-tracking-codebuild-backend" {
 
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild-backend" })
 }
+
+resource "aws_codebuild_webhook" "frontend_webhook" {
+  project_name = aws_codebuild_project.issue-tracking-codebuild-frontend.name
+
+  filter_group {
+    filter {
+      type    = "EVENT"
+      pattern = "PUSH"
+    }
+
+    filter {
+      type    = "HEAD_REF"
+      pattern = "master"
+    }
+  }
+}
+
+resource "aws_codebuild_webhook" "backend_webhook" {
+  project_name = aws_codebuild_project.issue-tracking-codebuild-backend.name
+
+  filter_group {
+    filter {
+      type    = "EVENT"
+      pattern = "PUSH"
+    }
+
+    filter {
+      type    = "HEAD_REF"
+      pattern = "master"
+    }
+  }
+}
