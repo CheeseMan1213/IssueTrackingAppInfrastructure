@@ -201,3 +201,142 @@ resource "aws_codebuild_webhook" "backend_webhook" {
     }
   }
 }
+
+### BEGIN: Notification setup for frontend CodeBuild ###
+resource "aws_cloudwatch_event_rule" "notify_frontend_build_rule" {
+  name        = "notify_frontend_build_rule"
+  description = "CodeBuild Build State Change"
+
+  event_pattern = <<PATTERN
+{
+  "source": [ 
+    "aws.codebuild"
+  ], 
+  "detail-type": [
+    "CodeBuild Build State Change"
+  ],
+  "detail": {
+    "build-status": [
+      "SUCCEEDED", 
+      "FAILED"
+    ],
+    "project-name": [
+      "${aws_codebuild_project.issue-tracking-codebuild-frontend.name}"
+    ]
+  }
+}
+PATTERN
+}
+
+resource "aws_cloudwatch_event_target" "notify_frontend_build_event_target" {
+  rule      = aws_cloudwatch_event_rule.notify_frontend_build_rule.name
+  target_id = "SendToSNS"
+  arn       = aws_sns_topic.nofify_frontend_build_topic.arn
+}
+
+resource "aws_sns_topic" "nofify_frontend_build_topic" {
+  name = "nofify_frontend_build_topic"
+}
+
+resource "aws_sns_topic_policy" "notify_frontend_build_policy" {
+  arn    = aws_sns_topic.nofify_frontend_build_topic.arn
+  policy = data.aws_iam_policy_document.sns_topic_policy_frontend.json
+}
+
+data "aws_iam_policy_document" "sns_topic_policy_frontend" {
+  statement {
+    effect  = "Allow"
+    actions = ["SNS:Publish"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+
+    resources = ["${aws_sns_topic.nofify_frontend_build_topic.arn}"]
+  }
+}
+
+resource "aws_sns_topic_subscription" "nofify_frontend_build_subscription" {
+  topic_arn = aws_sns_topic.nofify_frontend_build_topic.arn
+  protocol  = "sms"
+  endpoint  = var.myPhoneNumber
+}
+## TODO: Manually add subscription to sns topic for email once resources are created.
+## TL;DR reason: Not supported by Terraform; breaks the Terraform model
+
+### END: Notification setup for frontend CodeBuild ###
+
+### BEGIN: Notification setup for backend CodeBuild ###
+resource "aws_cloudwatch_event_rule" "notify_backend_build_rule" {
+  name        = "notify_backend_build_rule"
+  description = "CodeBuild Build State Change"
+
+  event_pattern = <<PATTERN
+{
+  "source": [ 
+    "aws.codebuild"
+  ], 
+  "detail-type": [
+    "CodeBuild Build State Change"
+  ],
+  "detail": {
+    "build-status": [
+      "SUCCEEDED", 
+      "FAILED"
+    ],
+    "project-name": [
+      "${aws_codebuild_project.issue-tracking-codebuild-backend.name}"
+    ]
+  }
+}
+PATTERN
+}
+
+resource "aws_cloudwatch_event_target" "notify_backend_build_event_target" {
+  rule      = aws_cloudwatch_event_rule.notify_backend_build_rule.name
+  target_id = "SendToSNS"
+  arn       = aws_sns_topic.nofify_backend_build_topic.arn
+}
+
+resource "aws_sns_topic" "nofify_backend_build_topic" {
+  name = "nofify_backend_build_topic"
+}
+
+resource "aws_sns_topic_policy" "notify_backend_build_policy" {
+  arn    = aws_sns_topic.nofify_backend_build_topic.arn
+  policy = data.aws_iam_policy_document.sns_topic_policy_backend.json
+}
+
+data "aws_iam_policy_document" "sns_topic_policy_backend" {
+  statement {
+    effect  = "Allow"
+    actions = ["SNS:Publish"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+
+    resources = ["${aws_sns_topic.nofify_backend_build_topic.arn}"]
+  }
+}
+
+resource "aws_sns_topic_subscription" "nofify_backend_build_subscription" {
+  topic_arn = aws_sns_topic.nofify_backend_build_topic.arn
+  protocol  = "sms"
+  endpoint  = var.myPhoneNumber
+}
+## TODO: Manually add subscription to sns topic for email once resources are created.
+## TL;DR reason: Not supported by Terraform; breaks the Terraform model
+
+### END: Notification setup for backend CodeBuild ###
+
+resource "aws_sns_sms_preferences" "update_sms_prefs" {
+  monthly_spend_limit = 1 # USD $1.00
+  // delivery_status_iam_role_arn = 
+  delivery_status_success_sampling_rate = 100
+  default_sender_id                     = "James"
+  default_sms_type                      = "Transactional"
+  // usage_report_s3_bucket = ""
+}
