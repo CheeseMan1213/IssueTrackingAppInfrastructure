@@ -209,17 +209,13 @@ resource "aws_cloudwatch_event_rule" "notify_frontend_build_rule" {
 
   event_pattern = <<PATTERN
 {
-  "source": [ 
+  "source": [
     "aws.codebuild"
-  ], 
+  ],
   "detail-type": [
     "CodeBuild Build State Change"
   ],
   "detail": {
-    "build-status": [
-      "SUCCEEDED", 
-      "FAILED"
-    ],
     "project-name": [
       "${aws_codebuild_project.issue-tracking-codebuild-frontend.name}"
     ]
@@ -230,7 +226,7 @@ PATTERN
 
 resource "aws_cloudwatch_event_target" "notify_frontend_build_event_target" {
   rule      = aws_cloudwatch_event_rule.notify_frontend_build_rule.name
-  target_id = "SendToSNS"
+  target_id = "SendToSNS_frontend"
   arn       = aws_sns_topic.nofify_frontend_build_topic.arn
 }
 
@@ -258,9 +254,10 @@ data "aws_iam_policy_document" "sns_topic_policy_frontend" {
 }
 
 resource "aws_sns_topic_subscription" "nofify_frontend_build_subscription" {
-  topic_arn = aws_sns_topic.nofify_frontend_build_topic.arn
-  protocol  = "sms"
-  endpoint  = var.myPhoneNumber
+  topic_arn            = aws_sns_topic.nofify_frontend_build_topic.arn
+  protocol             = "sms"
+  endpoint             = var.myPhoneNumber
+  raw_message_delivery = false
 }
 ## TODO: Manually add subscription to sns topic for email once resources are created.
 ## TL;DR reason: Not supported by Terraform; breaks the Terraform model
@@ -274,17 +271,13 @@ resource "aws_cloudwatch_event_rule" "notify_backend_build_rule" {
 
   event_pattern = <<PATTERN
 {
-  "source": [ 
+  "source": [
     "aws.codebuild"
-  ], 
+  ],
   "detail-type": [
     "CodeBuild Build State Change"
   ],
   "detail": {
-    "build-status": [
-      "SUCCEEDED", 
-      "FAILED"
-    ],
     "project-name": [
       "${aws_codebuild_project.issue-tracking-codebuild-backend.name}"
     ]
@@ -295,7 +288,7 @@ PATTERN
 
 resource "aws_cloudwatch_event_target" "notify_backend_build_event_target" {
   rule      = aws_cloudwatch_event_rule.notify_backend_build_rule.name
-  target_id = "SendToSNS"
+  target_id = "SendToSNS_backend"
   arn       = aws_sns_topic.nofify_backend_build_topic.arn
 }
 
@@ -323,9 +316,10 @@ data "aws_iam_policy_document" "sns_topic_policy_backend" {
 }
 
 resource "aws_sns_topic_subscription" "nofify_backend_build_subscription" {
-  topic_arn = aws_sns_topic.nofify_backend_build_topic.arn
-  protocol  = "sms"
-  endpoint  = var.myPhoneNumber
+  topic_arn            = aws_sns_topic.nofify_backend_build_topic.arn
+  protocol             = "sms"
+  endpoint             = var.myPhoneNumber
+  raw_message_delivery = false
 }
 ## TODO: Manually add subscription to sns topic for email once resources are created.
 ## TL;DR reason: Not supported by Terraform; breaks the Terraform model
@@ -333,10 +327,10 @@ resource "aws_sns_topic_subscription" "nofify_backend_build_subscription" {
 ### END: Notification setup for backend CodeBuild ###
 
 resource "aws_sns_sms_preferences" "update_sms_prefs" {
-  monthly_spend_limit = 1 # USD $1.00
+  monthly_spend_limit = 5 # USD $5.00
   // delivery_status_iam_role_arn = 
   delivery_status_success_sampling_rate = 100
   default_sender_id                     = "James"
-  default_sms_type                      = "Transactional"
+  default_sms_type                      = "Promotional"
   // usage_report_s3_bucket = ""
 }
