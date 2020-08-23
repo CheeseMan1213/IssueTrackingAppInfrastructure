@@ -1,0 +1,31 @@
+{
+    "AWSEBDockerrunVersion": 2,
+    "containerDefinitions": [
+        {
+            "name": "eb_frontend",
+            "image": "475640621870.dkr.ecr.us-east-1.amazonaws.com/issue-tracking-ecr-frontend:latest",
+            "essential": true,
+            "memory": 1024,
+            "portMappings": [
+                {
+                  "hostPort": 80,
+                  "protocol": "tcp",
+                  "containerPort": 80
+                }
+              ]
+        },
+        {
+            "name": "eb_backend",
+            "image": "475640621870.dkr.ecr.us-east-1.amazonaws.com/issue-tracking-ecr-backend:latest",
+            "essential": true,
+            "memory": 1024,
+            "portMappings": [
+                {
+                  "hostPort": 8080,
+                  "protocol": "tcp",
+                  "containerPort": 8080
+                }
+              ]
+        }
+    ]
+}
