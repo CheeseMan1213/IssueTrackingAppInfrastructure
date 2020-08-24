@@ -16,3 +16,7 @@
 
 kubeconfig_IssueTrackingdevelopmentCluster
 .DS_Store
+# Elastic Beanstalk Files
+Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*
+!Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*.cfg.yml
+!Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*.global.yml
