@@ -163,41 +163,41 @@ resource "aws_security_group" "postgres-sg" {
 }
 
 # EC2 instance security group 
-resource "aws_security_group" "ec2_sg" {
-  name   = "ec2_sg"
-  vpc_id = module.vpc.vpc_id
+# resource "aws_security_group" "ec2_sg" {
+#   name   = "ec2_sg"
+#   vpc_id = module.vpc.vpc_id
 
-  ingress { # 1
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress { # 1
+#     from_port   = 80
+#     to_port     = 80
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress { # 2
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress { # 2
+#     from_port   = 8080
+#     to_port     = 8080
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  ingress { # 3
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   ingress { # 3
+#     from_port   = 22
+#     to_port     = 22
+#     protocol    = "tcp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  # Allow all traffic out of the EC2 instance.
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+#   # Allow all traffic out of the EC2 instance.
+#   egress {
+#     from_port   = 0
+#     to_port     = 0
+#     protocol    = "-1"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
 
-  tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}_ec2_sg" })
-}
+#   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}_ec2_sg" })
+# }
 
 # module "my-cluster" {
 #   source          = "terraform-aws-modules/eks/aws"
@@ -227,32 +227,32 @@ resource "aws_security_group" "ec2_sg" {
     I am doing this because I had trouble with EKS, and ECS, and the load balancer being forced
     on me.
 */
-module "production_like_EC2_1" {
-  source  = "terraform-aws-modules/ec2-instance/aws"
-  version = "~> 2.15.0"
+# module "production_like_EC2_1" {
+#   source  = "terraform-aws-modules/ec2-instance/aws"
+#   version = "~> 2.15.0"
 
-  name           = "production_like_EC2_1"
-  instance_count = 1
+#   name           = "production_like_EC2_1"
+#   instance_count = 1
 
-  ami                         = "ami-0332883b0fc77c4c7"
-  instance_type               = "t2.medium" # 2 CPU and 4 RAM
-  key_name                    = "IssueTrackingApp_EC2_key"
-  monitoring                  = true
-  associate_public_ip_address = true
-  vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
-  subnet_id                   = module.vpc.public_subnets[0]
-  root_block_device = [
-    {
-      volume_type = "gp2"
-      volume_size = 30
-    },
-  ]
+#   ami                         = "ami-0332883b0fc77c4c7"
+#   instance_type               = "t2.medium" # 2 CPU and 4 RAM
+#   key_name                    = "IssueTrackingApp_EC2_key"
+#   monitoring                  = true
+#   associate_public_ip_address = true
+#   vpc_security_group_ids      = [aws_security_group.ec2_sg.id]
+#   subnet_id                   = module.vpc.public_subnets[0]
+#   root_block_device = [
+#     {
+#       volume_type = "gp2"
+#       volume_size = 30
+#     },
+#   ]
 
-  tags = merge(local.common_tags, { Name = "issueTracking-${local.env_name}_production_like_EC2_1" })
-}
+#   tags = merge(local.common_tags, { Name = "issueTracking-${local.env_name}_production_like_EC2_1" })
+# }
 
-resource "aws_eip_association" "eip_assoc" {
-  # 'instance_id' needs to be accessed as an array, because I am using the module, not the resource.
-  instance_id   = module.production_like_EC2_1.id[0]
-  allocation_id = "eipalloc-088b4ae5c94d86337"
-}
+# resource "aws_eip_association" "eip_assoc" {
+#   # 'instance_id' needs to be accessed as an array, because I am using the module, not the resource.
+#   instance_id   = module.production_like_EC2_1.id[0]
+#   allocation_id = "eipalloc-088b4ae5c94d86337"
+# }
