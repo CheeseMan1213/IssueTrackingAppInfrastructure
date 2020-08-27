@@ -72,11 +72,15 @@ POLICY
   # The resource itself.
 }
 
-# Second policy. This is an AWS managed one.
+# Second policy. This is an AWS managed policy.
 resource "aws_iam_role_policy_attachment" "issue-tracking-ecr-full-access" {
   role       = aws_iam_role.issue-tracking-code-build-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
-
+}
+# Third policy. This is an AWS managed policy.
+resource "aws_iam_role_policy_attachment" "issue-tracking-S3-full-access" {
+  role       = aws_iam_role.issue-tracking-code-build-role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
 }
 
 ## The main thing we want at the monent is an AWS CodeBuild project.
@@ -170,37 +174,37 @@ resource "aws_codebuild_project" "issue-tracking-codebuild-backend" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild-backend" })
 }
 
-resource "aws_codebuild_webhook" "frontend_webhook" {
-  project_name = aws_codebuild_project.issue-tracking-codebuild-frontend.name
+# resource "aws_codebuild_webhook" "frontend_webhook" {
+#   project_name = aws_codebuild_project.issue-tracking-codebuild-frontend.name
 
-  filter_group {
-    filter {
-      type    = "EVENT"
-      pattern = "PUSH"
-    }
+#   filter_group {
+#     filter {
+#       type    = "EVENT"
+#       pattern = "PUSH"
+#     }
 
-    filter {
-      type    = "HEAD_REF"
-      pattern = "master"
-    }
-  }
-}
+#     filter {
+#       type    = "HEAD_REF"
+#       pattern = "master"
+#     }
+#   }
+# }
 
-resource "aws_codebuild_webhook" "backend_webhook" {
-  project_name = aws_codebuild_project.issue-tracking-codebuild-backend.name
+# resource "aws_codebuild_webhook" "backend_webhook" {
+#   project_name = aws_codebuild_project.issue-tracking-codebuild-backend.name
 
-  filter_group {
-    filter {
-      type    = "EVENT"
-      pattern = "PUSH"
-    }
+#   filter_group {
+#     filter {
+#       type    = "EVENT"
+#       pattern = "PUSH"
+#     }
 
-    filter {
-      type    = "HEAD_REF"
-      pattern = "master"
-    }
-  }
-}
+#     filter {
+#       type    = "HEAD_REF"
+#       pattern = "master"
+#     }
+#   }
+# }
 
 ### BEGIN: Notification setup for frontend CodeBuild ###
 resource "aws_cloudwatch_event_rule" "notify_frontend_build_rule" {
