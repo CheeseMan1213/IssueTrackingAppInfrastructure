@@ -79,6 +79,11 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
 # Creating S3 bucket for initial Dockerrun.aws.json file.
 resource "aws_s3_bucket" "issue-tracking-eb-DockerRun" {
   bucket = "issue-tracking-eb-dockerrun"
+  acl    = "private"
+
+  versioning {
+    enabled = true
+  }
 }
 # Giving Dockerrun.aws.json file.
 resource "aws_s3_bucket_object" "issue-tracking-eb-DockerRun-obj" {
