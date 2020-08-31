@@ -74,6 +74,15 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     value     = 0
   }
 
+  /*
+  NOTE = Terraform keeps on thinking that it needs to fix the "version_label" when it does
+  not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
+  to the elastic beanstalk env.
+  */
+  lifecycle {
+    ignore_changes = all
+  }
+
   tags = merge(local.common_tags, { Name_1 = "issueTracking-${local.env_name}_issue-tracking-eb-ev" })
 }
 # Creating S3 bucket for initial Dockerrun.aws.json file.
