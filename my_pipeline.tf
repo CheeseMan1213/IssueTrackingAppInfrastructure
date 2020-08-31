@@ -226,10 +226,10 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
     type = "S3"
   }
 
-  stage {
+  stage { # 1
     name = "Source"
 
-    action {
+    action { # 1
       name             = "Source_Frontend"
       category         = "Source"
       owner            = "ThirdParty"
@@ -244,7 +244,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
         OAuthToken = var.github_token
       }
     }
-    action {
+    action { # 2
       name             = "Source_Backend"
       category         = "Source"
       owner            = "ThirdParty"
@@ -273,10 +273,10 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
       }
     }
   }
-  stage {
+  stage { # 2
     name = "Build"
 
-    action {
+    action { # 1
       name             = "Build_Frontend"
       category         = "Build"
       owner            = "AWS"
@@ -289,7 +289,11 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
         ProjectName = aws_codebuild_project.issue-tracking-codebuild-frontend.name
       }
     }
-    action {
+  }
+  stage { # 3
+    name = "Build_2"
+
+    action { # 1
       name             = "Build_Backend"
       category         = "Build"
       owner            = "AWS"
@@ -303,7 +307,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
       }
     }
   }
-  stage { # 3
+  stage { # 4
     name = "Deploy"
 
     action { # 1
@@ -319,5 +323,13 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
         EnvironmentName = aws_elastic_beanstalk_environment.issue-tracking-eb-ev.name
       }
     }
+  }
+  /*
+  NOTE = Terraform keeps on thinking that it needs to fix the "OAuthToken" when it does
+  not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
+  to the pipeline.
+  */
+  lifecycle {
+    ignore_changes = all
   }
 }
