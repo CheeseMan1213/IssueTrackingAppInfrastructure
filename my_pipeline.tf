@@ -209,6 +209,14 @@ resource "aws_s3_bucket" "issue_tracking_pipeline_bucket" {
     enabled = true
   }
 }
+resource "aws_s3_bucket_public_access_block" "pipeline" {
+  bucket = aws_s3_bucket.issue_tracking_pipeline_bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
+}
 /*
     Note = See this webpage for help:
     https://docs.aws.amazon.com/codepipeline/latest/userguide/reference-pipeline-structure.html#action-requirements
@@ -329,7 +337,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the pipeline.
   */
-  lifecycle {
-    ignore_changes = all
-  }
+  # lifecycle {
+  #   ignore_changes = all
+  # }
 }

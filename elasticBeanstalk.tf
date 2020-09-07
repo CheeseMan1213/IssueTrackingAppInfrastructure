@@ -79,14 +79,14 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the elastic beanstalk env.
   */
-  lifecycle {
-    ignore_changes = all
-  }
+  # lifecycle {
+  #   ignore_changes = all
+  # }
 
   tags = merge(local.common_tags, { Name_1 = "issueTracking-${local.env_name}_issue-tracking-eb-ev" })
 }
 # Creating S3 bucket for initial Dockerrun.aws.json file.
-resource "aws_s3_bucket" "issue-tracking-eb-DockerRun" {
+resource "aws_s3_bucket" "issue_tracking_eb_DockerRun" {
   bucket = "issue-tracking-eb-dockerrun"
   acl    = "private"
 
@@ -94,6 +94,15 @@ resource "aws_s3_bucket" "issue-tracking-eb-DockerRun" {
     enabled = true
   }
 }
+resource "aws_s3_bucket_public_access_block" "dockerrun" {
+  bucket = aws_s3_bucket.issue_tracking_eb_DockerRun.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls = true
+  restrict_public_buckets = true
+}
+
 # Giving Dockerrun.aws.json file.
 resource "aws_s3_bucket_object" "issue-tracking-eb-DockerRun-obj" {
   bucket = aws_s3_bucket.issue-tracking-eb-DockerRun.id
