@@ -1,0 +1,44 @@
+aws_access_key = ""
+
+aws_secret_key = ""
+
+key_name = ""
+
+private_key_path = ""
+
+databaseUserName = ""
+
+databasePassword = ""
+
+myPhoneNumber = "+1"
+
+github_token = ""
+
+network_address_space = {
+  Development = "10.0.0.0/16"
+  UAT         = "10.1.0.0/16"
+  Production  = "10.2.0.0/16"
+}
+
+instance_size = {
+  Development = "t2.micro"
+  UAT         = "t2.small"
+  Production  = "t2.medium"
+}
+db_size = {
+  Development = "db.t2.micro"
+  UAT         = "db.t2.small"
+  Production  = "db.t2.medium"
+}
+
+subnet_count = {
+  Development = 2
+  UAT         = 2
+  Production  = 3
+}
+
+instance_count = {
+  Development = 2
+  UAT         = 4
+  Production  = 6
+}
