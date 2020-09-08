@@ -212,9 +212,9 @@ resource "aws_s3_bucket" "issue_tracking_pipeline_bucket" {
 resource "aws_s3_bucket_public_access_block" "pipeline" {
   bucket = aws_s3_bucket.issue_tracking_pipeline_bucket.id
 
-  block_public_acls   = true
-  block_public_policy = true
-  ignore_public_acls = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 /*
@@ -276,8 +276,8 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
       output_artifacts = ["SourceArtifact_3"]
 
       configuration = {
-        S3Bucket    = aws_s3_bucket.issue-tracking-eb-DockerRun.id
-        S3ObjectKey = aws_s3_bucket_object.issue-tracking-eb-DockerRun-obj.id
+        S3Bucket    = aws_s3_bucket.issue_tracking_eb_DockerRun.id
+        S3ObjectKey = aws_s3_bucket_object.issue_tracking_eb_DockerRun_obj.id
       }
     }
   }

@@ -97,15 +97,15 @@ resource "aws_s3_bucket" "issue_tracking_eb_DockerRun" {
 resource "aws_s3_bucket_public_access_block" "dockerrun" {
   bucket = aws_s3_bucket.issue_tracking_eb_DockerRun.id
 
-  block_public_acls   = true
-  block_public_policy = true
-  ignore_public_acls = true
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
   restrict_public_buckets = true
 }
 
 # Giving Dockerrun.aws.json file.
-resource "aws_s3_bucket_object" "issue-tracking-eb-DockerRun-obj" {
-  bucket = aws_s3_bucket.issue-tracking-eb-DockerRun.id
+resource "aws_s3_bucket_object" "issue_tracking_eb_DockerRun_obj" {
+  bucket = aws_s3_bucket.issue_tracking_eb_DockerRun.id
   key    = "beanstalk/Dockerrun.aws.json"
   source = "Elastic_Beanstalk_CLI_Root/Dockerrun.aws.json"
 }
@@ -113,6 +113,6 @@ resource "aws_elastic_beanstalk_application_version" "issue-tracking-eb-version"
   name        = "issue-tracking-eb-version"
   application = "issue-tracking-eb-app"
   description = "Application version created by Terraform."
-  bucket      = aws_s3_bucket.issue-tracking-eb-DockerRun.id
-  key         = aws_s3_bucket_object.issue-tracking-eb-DockerRun-obj.id
+  bucket      = aws_s3_bucket.issue_tracking_eb_DockerRun.id
+  key         = aws_s3_bucket_object.issue_tracking_eb_DockerRun_obj.id
 }
