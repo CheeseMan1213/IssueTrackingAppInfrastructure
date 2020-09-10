@@ -3,11 +3,16 @@ resource "aws_elastic_beanstalk_application" "issue-tracking-eb-app" {
   description = "issue-tracking-eb-app"
 }
 
+/*
+Helpful links:
+https://github.com/cloudposse/terraform-aws-elastic-beanstalk-environment/blob/master/variables.tf
+https://github.com/cloudposse/terraform-aws-elastic-beanstalk-environment/blob/master/main.tf
+*/
 resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   name                   = "issue-tracking-eb-ev"
   application            = aws_elastic_beanstalk_application.issue-tracking-eb-app.name
   description            = "My EB ENV for the my IssueTrackingApp (A Jira clone.)"
-  solution_stack_name    = "64bit Amazon Linux 2018.03 v2.21.0 running Multi-container Docker 19.03.6-ce (Generic)"
+  solution_stack_name    = "64bit Amazon Linux 2018.03 v2.22.0 running Multi-container Docker 19.03.6-ce (Generic)"
   tier                   = "WebServer"
   wait_for_ready_timeout = "20m"
   # This line helps the AWS Elastic Beanstalk environment use the Dockerrun.aws.json file.
@@ -22,10 +27,10 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   # Gives VPC.
   setting {
     namespace = "aws:ec2:vpc"     # Must point to an AWS resource
-    name      = "VPCId"           # //
+    name      = "VPCId"           # Also from a finite list. See internet.
     value     = module.vpc.vpc_id # //
   }
-  # Assocciates my elastic IP.
+  # Assocciates a elastic IP.
   setting {
     namespace = "aws:ec2:vpc"
     name      = "AssociatePublicIpAddress"
@@ -58,21 +63,159 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "InstanceType"
     value     = "t2.medium"
   }
-  setting {
+  setting { # value     = "SingleInstance"
     namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
-    value     = "SingleInstance"
+    value     = "LoadBalanced"
   }
   setting {
-    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
-    name      = "RollingUpdateType"
-    value     = "Time"
+    namespace = "aws:elasticbeanstalk:environment"
+    name      = "LoadBalancerType"
+    value     = "application"
   }
   setting {
-    namespace = "aws:autoscaling:updatepolicy:rollingupdate"
-    name      = "MinInstancesInService"
-    value     = 0
+    namespace = "aws:autoscaling:asg"
+    name      = "MinSize"
+    value     = 1
   }
+  setting {
+    namespace = "aws:autoscaling:asg"
+    name      = "MaxSize"
+    value     = 1
+  }
+  ### Listeners BEGIN
+  setting { # 1
+    namespace = "aws:elb:listener:80"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elb:listener:80"
+    name      = "ListenerProtocol"
+    value     = "HTTP"
+  }
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "LoadBalancerHTTPPort"
+    value     = 80
+  }
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "LoadBalancerPortProtocol"
+    value     = "HTTP"
+  }
+  setting {
+    namespace = "aws:elb:listener:80"
+    name      = "InstancePort"
+    value     = 80
+  }
+
+  setting { # 2
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "ListenerProtocol"
+    value     = "HTTPS"
+  }
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "LoadBalancerHTTPSPort"
+    value     = 443
+  }
+  setting {
+    namespace = "aws:elb:loadbalancer"
+    name      = "LoadBalancerSSLPortProtocol"
+    value     = "HTTPS"
+  }
+  setting {
+    namespace = "aws:elb:listener:443"
+    name      = "InstancePort"
+    # value     = 443
+    value = 80 ## Still needs to be 80 because this is the instance/applocation port
+    ## and I only EXPOSE port 80 and 8080 in my Dockerfiles.
+  }
+
+  setting { # 3
+    namespace = "aws:elb:listener:8080"
+    name      = "ListenerProtocol"
+    value     = "HTTP"
+  }
+  setting {
+    namespace = "aws:elb:listener:8080"
+    name      = "InstancePort"
+    value     = 8080
+  }
+  ### Listeners END
+
+  ### Processes BEGIN
+  setting { # 1
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "HealthCheckPath"
+    value     = "/"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "Port"
+    value     = 80
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "Protocol"
+    value     = "HTTP"
+  }
+
+  setting { # 2
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "HealthCheckPath"
+    value     = "/"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "Port"
+    value     = 443
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "Protocol"
+    value     = "HTTPS"
+  }
+
+  setting { # 3
+    namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
+    name      = "HealthCheckPath"
+    value     = "/"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
+    name      = "Port"
+    value     = 8080
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
+    name      = "Protocol"
+    value     = "HTTP"
+  }
+  ### Processes END
+
+  # setting { # Commenting out because undoing Cloudposse advice because no longer SingleInstance
+  #   namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+  #   name      = "RollingUpdateType"
+  #   value     = "Time"
+  # }
+  # setting { # Commenting out because undoing Cloudposse advice because no longer SingleInstance
+  #   namespace = "aws:autoscaling:updatepolicy:rollingupdate"
+  #   name      = "MinInstancesInService"
+  #   value     = 0
+  # }
+  # setting {
+  #   namespace = "aws:elb:listener:443"
+  #   name      = "SSLCertificateId"
+  #   # value     = "3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
+  #   value = "arn:aws:acm:us-east-1:475640621870:certificate/3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
+  # }
 
   /*
   NOTE = Terraform keeps on thinking that it needs to fix the "version_label" when it does
