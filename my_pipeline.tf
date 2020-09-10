@@ -337,7 +337,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the pipeline.
   */
-  # lifecycle {
-  #   ignore_changes = all
-  # }
+  lifecycle {
+    ignore_changes = all
+  }
 }
