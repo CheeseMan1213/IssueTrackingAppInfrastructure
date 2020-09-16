@@ -138,13 +138,39 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "Protocol"
     value     = "HTTP"
   }
+
+  setting { # 4
+    namespace = "aws:elbv2:listener:8443"
+    name      = "DefaultProcess"
+    value     = "backendSecure"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:8443"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:8443"
+    name      = "Protocol"
+    value     = "HTTPS"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:8443"
+    name      = "SSLCertificateArns"
+    value     = "arn:aws:acm:us-east-1:475640621870:certificate/3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
+  }
   ### Listeners END
 
   ### Processes BEGIN
   setting { # 1
     namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
     name      = "HealthCheckPath"
-    value     = "/"
+    value     = "/test-model"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "MatcherHTTPCode"
+    value     = 200
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
@@ -160,7 +186,12 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting { # 2
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
     name      = "HealthCheckPath"
-    value     = "/"
+    value     = "/test-model"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "MatcherHTTPCode"
+    value     = 200
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
@@ -171,13 +202,19 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
     name      = "Protocol"
-    value     = "HTTPS"
+    value     = "HTTP"
+    # value     = "HTTPS"
   }
 
   setting { # 3
     namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
     name      = "HealthCheckPath"
-    value     = "/"
+    value     = "/test/hello"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
+    name      = "MatcherHTTPCode"
+    value     = 200
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
@@ -188,6 +225,29 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     namespace = "aws:elasticbeanstalk:environment:process:backendNotSecure"
     name      = "Protocol"
     value     = "HTTP"
+  }
+
+  setting { # 4
+    namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
+    name      = "HealthCheckPath"
+    value     = "/test-model"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
+    name      = "MatcherHTTPCode"
+    value     = 200
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
+    name      = "Port"
+    # value     = 8443
+    value = 8080
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
+    name      = "Protocol"
+    # value     = "HTTPS"
+    value = "HTTP"
   }
   ### Processes END
 
