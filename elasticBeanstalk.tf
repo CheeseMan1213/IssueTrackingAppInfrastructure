@@ -7,6 +7,8 @@ resource "aws_elastic_beanstalk_application" "issue-tracking-eb-app" {
 Helpful links:
 https://github.com/cloudposse/terraform-aws-elastic-beanstalk-environment/blob/master/variables.tf
 https://github.com/cloudposse/terraform-aws-elastic-beanstalk-environment/blob/master/main.tf
+
+https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/command-options-general.html
 */
 resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   name                   = "issue-tracking-eb-ev"
@@ -85,68 +87,56 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   }
   ### Listeners BEGIN
   setting { # 1
-    namespace = "aws:elb:listener:80"
+    namespace = "aws:elbv2:listener:80"
+    name      = "DefaultProcess"
+    value     = "frontendNotSecure"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:80"
     name      = "ListenerEnabled"
     value     = "true"
   }
   setting {
-    namespace = "aws:elb:listener:80"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:80"
+    name      = "Protocol"
     value     = "HTTP"
-  }
-  setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "LoadBalancerHTTPPort"
-    value     = 80
-  }
-  setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "LoadBalancerPortProtocol"
-    value     = "HTTP"
-  }
-  setting {
-    namespace = "aws:elb:listener:80"
-    name      = "InstancePort"
-    value     = 80
   }
 
   setting { # 2
-    namespace = "aws:elb:listener:443"
+    namespace = "aws:elbv2:listener:443"
+    name      = "DefaultProcess"
+    value     = "frontendSecure"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:443"
     name      = "ListenerEnabled"
     value     = "true"
   }
   setting {
-    namespace = "aws:elb:listener:443"
-    name      = "ListenerProtocol"
+    namespace = "aws:elbv2:listener:443"
+    name      = "Protocol"
     value     = "HTTPS"
   }
   setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "LoadBalancerHTTPSPort"
-    value     = 443
-  }
-  setting {
-    namespace = "aws:elb:loadbalancer"
-    name      = "LoadBalancerSSLPortProtocol"
-    value     = "HTTPS"
-  }
-  setting {
-    namespace = "aws:elb:listener:443"
-    name      = "InstancePort"
-    # value     = 443
-    value = 80 ## Still needs to be 80 because this is the instance/applocation port
-    ## and I only EXPOSE port 80 and 8080 in my Dockerfiles.
+    namespace = "aws:elbv2:listener:443"
+    name      = "SSLCertificateArns"
+    value     = "arn:aws:acm:us-east-1:475640621870:certificate/3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
   }
 
   setting { # 3
-    namespace = "aws:elb:listener:8080"
-    name      = "ListenerProtocol"
-    value     = "HTTP"
+    namespace = "aws:elbv2:listener:8080"
+    name      = "DefaultProcess"
+    value     = "backendNotSecure"
   }
   setting {
-    namespace = "aws:elb:listener:8080"
-    name      = "InstancePort"
-    value     = 8080
+    namespace = "aws:elbv2:listener:8080"
+    name      = "ListenerEnabled"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elbv2:listener:8080"
+    name      = "Protocol"
+    value     = "HTTP"
   }
   ### Listeners END
 
@@ -175,7 +165,8 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
     name      = "Port"
-    value     = 443
+    value     = 80
+    # value     = 443
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
