@@ -293,9 +293,9 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the elastic beanstalk env.
   */
-  # lifecycle {
-  #   ignore_changes = all
-  # }
+  lifecycle {
+    ignore_changes = all
+  }
 
   tags = merge(local.common_tags, { Name_1 = "issueTracking-${local.env_name}_issue-tracking-eb-ev" })
 }
