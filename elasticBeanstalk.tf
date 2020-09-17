@@ -165,7 +165,7 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting { # 1
     namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
     name      = "HealthCheckPath"
-    value     = "/test-model"
+    value     = "/"
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
@@ -182,11 +182,21 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "Protocol"
     value     = "HTTP"
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "HealthCheckTimeout"
+    value     = 15
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendNotSecure"
+    name      = "HealthCheckInterval"
+    value     = 120
+  }
 
   setting { # 2
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
     name      = "HealthCheckPath"
-    value     = "/test-model"
+    value     = "/"
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
@@ -204,6 +214,16 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "Protocol"
     value     = "HTTP"
     # value     = "HTTPS"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "HealthCheckTimeout"
+    value     = 15
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:environment:process:frontendSecure"
+    name      = "HealthCheckInterval"
+    value     = 120
   }
 
   setting { # 3
@@ -230,7 +250,7 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting { # 4
     namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
     name      = "HealthCheckPath"
-    value     = "/test-model"
+    value     = "/test/hello"
   }
   setting {
     namespace = "aws:elasticbeanstalk:environment:process:backendSecure"
