@@ -35,8 +35,11 @@ resource "aws_cloudfront_distribution" "eb_alb_distribution" {
   comment             = "This is the CloudFront Distribution for my IssueTrackingApp."
   default_root_object = "index.html"
 
-  # aliases = ["james2ch9developer.com", "www.james2ch9developer.com", "app.james2ch9developer.com"]
-  aliases = ["james2ch9developer.com", "www.james2ch9developer.com"]
+  aliases = ["james2ch9developer.com", "www.james2ch9developer.com", "app.james2ch9developer.com"]
+  /*
+  The TL;DR is, yes, you do need both the frontend and backend URLs here.
+  */
+  # aliases = ["james2ch9developer.com", "www.james2ch9developer.com"]
 
   default_cache_behavior {
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
