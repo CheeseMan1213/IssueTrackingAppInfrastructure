@@ -78,6 +78,7 @@ resource "aws_iam_role_policy" "issue_tracking_codepipeline_policy" {
                 "elasticloadbalancing:*",
                 "autoscaling:*",
                 "cloudwatch:*",
+                "logs:*",
                 "s3:*",
                 "sns:*",
                 "cloudformation:*",
