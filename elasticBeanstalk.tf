@@ -65,6 +65,18 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "InstanceType"
     value     = "t2.medium"
   }
+  /////
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "RootVolumeType"
+    value     = "gp2"
+  }
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "RootVolumeSize"
+    value     = 200
+  }
+  /////
   setting { # value     = "SingleInstance"
     namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
@@ -291,7 +303,8 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   /*
   NOTE = Terraform keeps on thinking that it needs to fix the "version_label" when it does
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
-  to the elastic beanstalk env.
+  to the elastic beanstalk env. You will need to comment it out in order to get Terrafrom
+  to see any changes.
   */
   lifecycle {
     ignore_changes = all
