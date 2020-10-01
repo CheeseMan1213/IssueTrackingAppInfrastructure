@@ -1,6 +1,6 @@
 /*
-The CloudFront distribution needs a origin_id.
-I specify it like this to make it easier to change, since it is used in more than one place.
+  The CloudFront distribution needs an origin_id.
+  I specify it like this to make it easier to change, since it is used in more than one place.
 */
 locals {
   eb_alb_origin_id = "IssueTrackingAppOrigin"
@@ -10,9 +10,9 @@ resource "aws_cloudfront_distribution" "eb_alb_distribution" {
     For the 'domain_name', the best way to specify this value would be to find a way to
     reference it with what I have already created in terraform. However, I did not
     create a load balancer resource directly. Throughout the entierty of this project,
-    you will not find the resource 'aws_lb'. This is because I created an Elastic Beanstalk
-    environment, and then told that to make the load balancer. I was unable to figure out
-    how to reference the load balancer DNS from the 'aws_elastic_beanstalk_environment'
+    you will not find the resource 'aws_lb' or 'aws_alb'. This is because I created an
+    Elastic Beanstalk environment, and then told that to make the load balancer. I was unable
+    to figure out how to reference the load balancer DNS from the 'aws_elastic_beanstalk_environment'
     resource. Therefore, I have hardcoded it.
   */
   origin {
@@ -35,6 +35,8 @@ resource "aws_cloudfront_distribution" "eb_alb_distribution" {
   comment             = "This is the CloudFront Distribution for my IssueTrackingApp."
   default_root_object = "index.html"
 
+  # This line is very importent. I ws getting errors until I added it.
+  # **FIXED IT = I need to add my domain name as an alternate name in the CloudFront Distribution settings. CNAME
   aliases = ["james2ch9developer.com", "www.james2ch9developer.com"]
 
   default_cache_behavior {
@@ -57,6 +59,8 @@ resource "aws_cloudfront_distribution" "eb_alb_distribution" {
     max_ttl                = 86400
   }
 
+  # This is the cheapest price class.
+  # Valid Values: PriceClass_100 | PriceClass_200 | PriceClass_All
   price_class = "PriceClass_100"
 
   restrictions {
@@ -66,6 +70,7 @@ resource "aws_cloudfront_distribution" "eb_alb_distribution" {
     }
   }
 
+  # This is where SSL get configured.
   viewer_certificate {
     cloudfront_default_certificate = false
     acm_certificate_arn            = "arn:aws:acm:us-east-1:475640621870:certificate/3fc22192-ba8a-4936-a1f7-b7e3811c31c8"

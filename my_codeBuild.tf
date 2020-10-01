@@ -174,6 +174,11 @@ resource "aws_codebuild_project" "issue-tracking-codebuild-backend" {
   tags = merge(local.common_tags, { Name = "issue_tracking_app-${local.env_name}-codebuild-backend" })
 }
 
+/*
+  I commented out the web hooks becasue AWS CodePipeline is taking care of watching for
+  changes instead.
+*/
+
 # resource "aws_codebuild_webhook" "frontend_webhook" {
 #   project_name = aws_codebuild_project.issue-tracking-codebuild-frontend.name
 

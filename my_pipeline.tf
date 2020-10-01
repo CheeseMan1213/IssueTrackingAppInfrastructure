@@ -247,7 +247,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
       output_artifacts = ["SourceArtifact"]
 
       configuration = {
-        Owner      = "CheeseMan1213"
+        Owner      = var.github_username
         Repo       = "IssueTrackingAppFrontend"
         Branch     = "master"
         OAuthToken = var.github_token
@@ -262,7 +262,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
       output_artifacts = ["SourceArtifact_2"]
 
       configuration = {
-        Owner      = "CheeseMan1213"
+        Owner      = var.github_username
         Repo       = "IssueTrackingAppBackend"
         Branch     = "master"
         OAuthToken = var.github_token
@@ -338,6 +338,7 @@ resource "aws_codepipeline" "issue_tracking_pipeline" {
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the pipeline.
   */
+
   lifecycle {
     ignore_changes = all
   }

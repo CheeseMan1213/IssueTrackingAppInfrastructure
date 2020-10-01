@@ -12,6 +12,8 @@ databasePassword = ""
 
 myPhoneNumber = "+1"
 
+github_username = ""
+
 github_token = ""
 
 network_address_space = {

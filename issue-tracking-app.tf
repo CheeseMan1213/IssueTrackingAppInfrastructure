@@ -1,4 +1,8 @@
 # Controls for the terraform version allowed to be used from the cli.
+/*
+  Either your system needs to have this version of Terraform installed, or you 
+  need to adjust this number to match the one you have on your system.
+*/
 terraform {
   required_version = ">= 0.12.29"
 }
@@ -36,6 +40,17 @@ provider "template" {
 
 data "aws_availability_zones" "available" {}
 
+/*
+  In order to understand this template_file.public_cidrsubnet data {} object,
+  You will need access to a particular video:
+  Is will require a paid subscription.
+  https://www.pluralsight.com
+  Course = Terraform - Getting Started
+  By = Ned Bellavance
+  Module = 8
+  Video = Using the VPC module
+  Timestamp = 4 min 26 sec
+*/
 data "template_file" "public_cidrsubnet" {
   count = var.subnet_count[terraform.workspace]
 
@@ -86,6 +101,7 @@ module "db" {
   version = "~> 2.16.0"
 
   # Ugh, I had to make it all lowercase, else I got errors.
+  # The database names are a lot more restricted than others.
   identifier = "issuetrackingapp${local.env_name}db"
 
   engine            = "postgres"
@@ -223,8 +239,8 @@ resource "aws_security_group" "postgres-sg" {
 # }
 
 /*
-    This will be a "roll my own" "production like" enviornment EC2 instance.
-    I am doing this because I had trouble with EKS, and ECS, and the load balancer being forced
+    This will be a "roll my own" "production like" enviornment vanilla EC2 instance.
+    I am doing this because I had trouble with EKS, ECS, and the load balancer being forced
     on me.
 */
 # module "production_like_EC2_1" {

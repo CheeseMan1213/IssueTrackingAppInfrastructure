@@ -30,9 +30,10 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   setting {
     namespace = "aws:ec2:vpc"     # Must point to an AWS resource
     name      = "VPCId"           # Also from a finite list. See internet.
-    value     = module.vpc.vpc_id # //
+    value     = module.vpc.vpc_id # The thing you have more control of.
   }
-  # Assocciates a elastic IP.
+  # Assocciates a elastic IP. However, this is not the one I made.
+  # Elastic Beanstalk made another one.
   setting {
     namespace = "aws:ec2:vpc"
     name      = "AssociatePublicIpAddress"
@@ -65,7 +66,6 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "InstanceType"
     value     = "t2.medium"
   }
-  /////
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "RootVolumeType"
@@ -76,7 +76,6 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "RootVolumeSize"
     value     = 200
   }
-  /////
   setting { # value     = "SingleInstance"
     namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
@@ -129,6 +128,7 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "Protocol"
     value     = "HTTPS"
   }
+  # Helps set up SSL.
   setting {
     namespace = "aws:elbv2:listener:443"
     name      = "SSLCertificateArns"
@@ -166,6 +166,7 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
     name      = "Protocol"
     value     = "HTTPS"
   }
+  # Helps set up SSL.
   setting {
     namespace = "aws:elbv2:listener:8443"
     name      = "SSLCertificateArns"
@@ -283,29 +284,13 @@ resource "aws_elastic_beanstalk_environment" "issue-tracking-eb-ev" {
   }
   ### Processes END
 
-  # setting { # Commenting out because undoing Cloudposse advice because no longer SingleInstance
-  #   namespace = "aws:autoscaling:updatepolicy:rollingupdate"
-  #   name      = "RollingUpdateType"
-  #   value     = "Time"
-  # }
-  # setting { # Commenting out because undoing Cloudposse advice because no longer SingleInstance
-  #   namespace = "aws:autoscaling:updatepolicy:rollingupdate"
-  #   name      = "MinInstancesInService"
-  #   value     = 0
-  # }
-  # setting {
-  #   namespace = "aws:elb:listener:443"
-  #   name      = "SSLCertificateId"
-  #   # value     = "3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
-  #   value = "arn:aws:acm:us-east-1:475640621870:certificate/3fc22192-ba8a-4936-a1f7-b7e3811c31c8"
-  # }
-
   /*
   NOTE = Terraform keeps on thinking that it needs to fix the "version_label" when it does
   not. I am adding this "lifecycle {}" block in order to have Terraform ignore all changes
   to the elastic beanstalk env. You will need to comment it out in order to get Terrafrom
   to see any changes.
   */
+
   lifecycle {
     ignore_changes = all
   }
@@ -333,7 +318,9 @@ resource "aws_s3_bucket_public_access_block" "dockerrun" {
 # Giving Dockerrun.aws.json file.
 resource "aws_s3_bucket_object" "issue_tracking_eb_DockerRun_obj" {
   bucket = aws_s3_bucket.issue_tracking_eb_DockerRun.id
-  key    = "beanstalk/Dockerrun.aws.json"
+  # Is setting up the directory and name of where the file will go.
+  key = "beanstalk/Dockerrun.aws.json"
+  # This file is located in my project
   source = "Elastic_Beanstalk_CLI_Root/Dockerrun.aws.json"
 }
 resource "aws_elastic_beanstalk_application_version" "issue-tracking-eb-version" {
