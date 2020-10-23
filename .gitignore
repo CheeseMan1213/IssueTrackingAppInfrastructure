@@ -20,3 +20,4 @@ kubeconfig_IssueTrackingdevelopmentCluster
 Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*
 !Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*.cfg.yml
 !Elastic_Beanstalk_CLI_Root/.elasticbeanstalk/*.global.yml
+Dockerrun.aws.json
